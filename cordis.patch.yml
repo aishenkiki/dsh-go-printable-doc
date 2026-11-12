@@ -1,0 +1,4 @@
+# id: any unique id; name: must equal "name" in package.json.
+- insert:
+    - id: dsh-go-printable-doc
+      name: dsh-go-printable-doc

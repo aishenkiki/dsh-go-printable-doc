@@ -1,0 +1,77 @@
+{
+  "name": "dsh-go-printable-doc",
+  "version": "1.0.1",
+  "description": "把文章排成可直接打印的 A4 Word：一页纸结构、版心预算、逐页渲染预览。装插件即把 printable-doc 技能部署到本机，之后说「整理成 Word」就能用。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh-go",
+    "docx",
+    "word",
+    "print",
+    "skill"
+  ],
+  "license": "MIT",
+  "author": "aishenkiki",
+  "homepage": "https://github.com/aishenkiki/dsh-go-printable-doc",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aishenkiki/dsh-go-printable-doc.git"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "payload",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+  },
+  "dshGo": {
+    "v": 1,
+    "title": {
+      "zh": "打印文档",
+      "en": "Printable doc"
+    },
+    "icon": "document",
+    "contributes": {
+      "composer.actions": [
+        {
+          "id": "printable",
+          "label": {
+            "zh": "排成打印版",
+            "en": "Print"
+          },
+          "icon": "document",
+          "effect": {
+            "type": "insert",
+            "text": "把上面这篇整理成可直接打印的 Word（A4 两页、正反面一张纸），按 printable-doc 技能排版，最后给我 docx 和预览图。"
+          }
+        }
+      ],
+      "panels": [
+        {
+          "id": "printdoc",
+          "title": {
+            "zh": "打印文档",
+            "en": "Printable doc"
+          },
+          "icon": "document",
+          "placement": [
+            "features",
+            "session.tab"
+          ]
+        }
+      ]
+    }
+  }
+}

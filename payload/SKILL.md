@@ -16,16 +16,31 @@ python3 -c "import docx"        || pip install python-docx      # 必需
 python3 -c "import weasyprint"  || pip install weasyprint       # 预览用
 command -v pdftoppm             || apt-get install -y poppler-utils
 fc-list :lang=zh | head -3                                      # 中文字体
+# 来源是视频/音频时才需要（见 references/video-to-text.md）
+command -v ffmpeg               || apt-get install -y ffmpeg
+python3 -c "import sherpa_onnx" || pip install sherpa-onnx
 ```
 
 - **python-docx 缺了不能用**：先装，装不上就直接告诉用户缺什么，别硬跑。
 - **weasyprint / poppler 缺了不影响成稿**：照常生成 docx、照常跑 `check_docx.py`，
   但**不要声称看过预览**——说清楚「环境缺预览工具，只做了结构校验」。
+- **ffmpeg / sherpa-onnx 只在视频来源时需要**：链接是视频才装；缺了就先问用户要文字稿，
+  不要拿同题文章凑正文（见 `references/video-to-text.md`）。
 - **中文字体**：没有 CJK 字体时 Word 里会整体回退，行高可能变。先
   `apt-get install -y fonts-noto-cjk`；docx 里的字体名仍写「微软雅黑 / 宋体」，
   本机靠 fontconfig 别名兜底，用户的 Windows/WPS 上有真字体。
 
 ## 流程
+
+### 0. 用户给的是视频 / 音频时，先把正文取下来
+
+链接是短视频、播客、直播切片时，先找文字稿，找不到再做转写——**不要凭标题猜内容**。
+
+- 有软字幕流：`ffprobe` 看 `stream=codec_type`，有 `subtitle` 就 `ffmpeg -map 0:s:0` 抽出来。
+- 只有 `video` + `audio`：抽音轨做语音转写，**不要 OCR 烧录字幕**——
+  实测 0.5 秒/帧、2fps 抽 176 帧约 89 秒，识别出来还是乱码。
+- 头条视频取直链、SenseVoice 模型下载与调用、环境坑，全在 `references/video-to-text.md`。
+- 同题的其他文章不是原文，不要拿来凑正文。
 
 ### 1. 先定页数和每页内容
 
@@ -72,8 +87,9 @@ cp preview/preview.pdf "/sdcard/Download/DSH-Go/<名字>（预览）.pdf"
 # 需要逐页预览图时，再逐个复制为 <名字>-预览第1页.png、第2页……
 ```
 
-用 `present` 交付 Word 主件（需要时连同预览 PDF）；说明预览 PDF 与 Word 之间可能有细微字体差异，
-且预览 PDF 不含页脚——正式打印用 docx。
+用 `present` 交付 Word 主件（需要时连同预览 PDF）；说明预览 PDF 与 Word 之间仍有细微字体差异
+（中文换行、字重），但页脚已经画出来了（`preview.py` 从 `word/footer1.xml` 取文字，画进 `@bottom-center`）
+——正式打印用 docx。
 
 ## 引擎速查
 
@@ -93,7 +109,7 @@ d.text(p, "正文", size=11, color=GREY)  # 同一段可多次调用拼混排
 
 d.callout(build_fn)                # 整宽淡色卡片，build_fn(cell) 里用 d.cell_para/d.border
 d.section_head("01", "板块标题", "TAG")
-d.item("①", "条目标题", "一行说明")
+d.item("①", "条目标题", "一行说明")        # 页紧时再加 body_after=5, head_line=15, body_line=14
 d.timeline([("第 1 个月", ["变化只是", "「不用催了」"]), ...])
 d.quote("所谓自推", ["把决定变成流程，", "最后孩子自己往前走。"], "补充一句")
 d.save(path, title=..., author=..., comments=...)
@@ -110,6 +126,8 @@ d.save(path, title=..., author=..., comments=...)
 - [ ] 正文页页底至少留 1.5cm 机动量（约 42pt）
 - [ ] 页码/页脚有一行来源说明
 - [ ] 中文引号统一用「」，破折号统一用——
+- [ ] 两页的末行落点接近（第 2 页明显更空时调 `d.gap()`，不是把内容硬塞）
+- [ ] 来源是视频/音频时：正文来自转写，页脚写了平台与账号
 - [ ] 没有半页以上的突兀空白（尾页除外）
 
 ## 改引擎之后
@@ -128,5 +146,6 @@ python3 preview.py /tmp/example.docx /tmp/example_preview   # 应仍是 2 页
 ## 参考
 
 - `references/layout.md`：单位换算、字号行距表、一页预算表、分页策略
-- `references/pitfalls.md`：LibreOffice 不可用、XML 顺序、预览重复文本、假三页、窄栏断词等十三个坑
+- `references/video-to-text.md`：来源是视频/音频时怎么取正文（字幕 → 转写 → 别 OCR 烧录字幕）
+- `references/pitfalls.md`：LibreOffice 不可用、XML 顺序、预览重复文本、假三页、窄栏断词等十五个坑
 - `scripts/example_article.py`：成品级样例（两页、三板块、时间轴、卡片、金句）

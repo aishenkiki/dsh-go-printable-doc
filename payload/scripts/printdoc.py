@@ -296,13 +296,13 @@ class PrintDoc:
                   color=self.t['light'], spacing=1.2)
         self.rule(sz=6, before=2, after=7)
 
-    def item(self, mark, head, body, body_after=7):
+    def item(self, mark, head, body, body_after=7, head_line=15.5, body_line=14.5):
         """编号条目：① 标题 + 缩进一行的说明。"""
-        para = self.p(0, 1.5, 15.5, left=0.8, hanging=0.8, keep=True)
+        para = self.p(0, 1.5, head_line, left=0.8, hanging=0.8, keep=True)
         self.text(para, mark + "  ", cn=self.t['sans'], size=9.5,
                   bold=True, color=self.t['accent'])
         self.text(para, head, size=10.5, bold=True)
-        p2 = self.p(0, body_after, 14.5, left=0.8)
+        p2 = self.p(0, body_after, body_line, left=0.8)
         self.text(p2, body, size=9, color=self.t['light'])
         return para
 

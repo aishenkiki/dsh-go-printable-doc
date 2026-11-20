@@ -1,7 +1,7 @@
 {
   "name": "dsh-go-printable-doc",
-  "version": "1.0.1",
-  "description": "把文章排成可直接打印的 A4 Word：一页纸结构、版心预算、逐页渲染预览。装插件即把 printable-doc 技能部署到本机，之后说「整理成 Word」就能用。",
+  "version": "1.1.0",
+  "description": "把文章或视频排成可直接打印的 A4 Word：一页纸结构、版心预算、逐页渲染预览；视频链接先转写再排版。装插件即把 printable-doc 技能部署到本机。",
   "keywords": [
     "dsh",
     "dsh-plugin",

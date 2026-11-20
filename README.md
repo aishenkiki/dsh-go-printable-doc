@@ -24,8 +24,11 @@ dsh plugin --profile web add dsh-go-printable-doc
   内容超了就提前发现，不是打完才发现多出一页。
 - **生成后自查**：`check_docx.py` 校验 OOXML 元素顺序（顺序错了 Word 会报「文件已损坏」），
   `preview.py` 渲染成 PNG 逐页看效果。**看过再交付**。
-- **踩过的坑都写下来了**：`references/pitfalls.md` 里 13 条，包括 LibreOffice 在手机上起不来、
-  `w:tcMar` 用 `w:w`、表格超宽静默溢出、字体缺失等。
+- **视频链接也能排**：贴的是短视频/播客时，先抽字幕、没有字幕就语音转写
+  （88 秒音频约 4.6 秒），再按同样版式成稿；烧录字幕不做 OCR，原因写在
+  `references/video-to-text.md`。
+- **踩过的坑都写下来了**：`references/pitfalls.md` 里 15 条，包括 LibreOffice 在手机上起不来、
+  `w:tcMar` 用 `w:w`、表格超宽静默溢出、假三页、字体缺失等。
 
 ## 环境依赖
 
@@ -37,13 +40,15 @@ dsh plugin --profile web add dsh-go-printable-doc
 | `weasyprint` | 否 | 渲染预览图。有它才能「看过再交付」 |
 | `pdftoppm`（poppler-utils） | 否 | 把预览 PDF 转成 PNG |
 | `fonts-noto-cjk` | 建议 | 本机渲染中文字体；docx 里仍写微软雅黑/宋体，用户机器上有真字体 |
+| `ffmpeg` | 否 | 视频/音频链接取音轨。缺了只能排文字稿 |
+| `sherpa-onnx` | 否 | 语音转写（SenseVoice）。模型约 1GB，第一次要下 |
 
 ```sh
-pip install python-docx weasyprint
-apt-get install -y poppler-utils fonts-noto-cjk
+pip install python-docx weasyprint sherpa-onnx
+apt-get install -y poppler-utils fonts-noto-cjk ffmpeg
 ```
 
-面板里会实时显示这五项的状态，缺哪项、怎么补都写在上面。
+面板里会实时显示这七项的状态，缺哪项、怎么补都写在上面。
 
 ## 面板
 
@@ -64,11 +69,14 @@ apt-get install -y poppler-utils fonts-noto-cjk
 ## 已知边界
 
 - 技能只在**新会话**生效，装完/升级完要新开对话。
-- 只负责排版成稿；抓网页、提炼内容由对话本身完成。
+- 只负责排版成稿；抓网页、提音频、转写、提炼内容由对话本身完成。
 - 生成的是 A4 版式，打印时选「实际大小 / 100%」，不要选「适合页面」。
 
 ## 更新记录
 
+- **1.1.0**：新增视频来源流程（`references/video-to-text.md`：头条取直链、SenseVoice 转写、为什么不用 OCR 烧录字幕）；
+  `preview.py` 现在会把页脚画进预览；`item()` 支持 `head_line` / `body_line`，页紧时能收行距；
+  pitfalls 补「别用同题文章凑正文」「只差一行先收行距」；面板自检加 ffmpeg、sherpa-onnx 两项。
 - **1.0.1**：修复 `rule(width, align='center')` 只缩右边、金句短线偏左的 bug；补「假三页」「窄栏断词」等坑；交付命名与自检步骤。
 - **1.0.0**：首个版本。
 

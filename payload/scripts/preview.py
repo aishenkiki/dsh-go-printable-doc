@@ -174,6 +174,30 @@ def table_html(tbl):
             f'<div style="height:0;line-height:0;font-size:0">&nbsp;</div>')
 
 
+def footer_css(docx_path):
+    """把 word/footer1.xml 里的页脚文字画在 @bottom-center，预览才和打印一致。"""
+    import re
+    import zipfile
+    try:
+        z = zipfile.ZipFile(docx_path)
+    except Exception:
+        return ''
+    names = sorted(n for n in z.namelist()
+                   if re.match(r'word/footer\d*\.xml$', n))
+    if not names:
+        return ''
+    x = z.read(names[0]).decode('utf-8')
+    text = ''.join(re.findall(r'<w:t[^>]*>([^<]*)</w:t>', x)).strip()
+    if not text:
+        return ''
+    m = re.search(r'<w:sz w:val="(\d+)"', x)
+    c = re.search(r'<w:color w:val="([0-9A-Fa-f]{6})"', x)
+    sz = int(m.group(1)) / 2 if m else 8
+    col = '#' + c.group(1) if c else '#8A918C'
+    return (f'@page {{ @bottom-center {{ content: "{text}";'
+            f' font-family: NotoSerifSC; font-size: {sz}pt; color: {col}; }} }}')
+
+
 def render_html(docx_path):
     d = Document(docx_path)
     parts = []
@@ -195,6 +219,7 @@ def render_html(docx_path):
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {faces}
 @page {{ size: A4; margin: 16mm 21.5mm 14mm 21.5mm; }}
+{footer_css(docx_path)}
 html, body {{ margin:0; padding:0; }}
 body {{ font-family: NotoSerifSC; font-size:10pt; color:#1B3B33; }}
 p {{ margin:0; }}
